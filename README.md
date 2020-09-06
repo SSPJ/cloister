@@ -16,7 +16,7 @@ I wrote this for people who do not or cannot use Exercism.io to track their prog
 Suppose you want to learn Ruby. At a bash prompt, type these commands:
 
 ```
-git clone <url>            # download cloister
+git clone https://github.com/SSPJ/cloister.git           # download cloister
 cd cloister/ruby           # change to the language of your choice
 git clone --bare git@github.com:exercism/ruby.git .git   # download Exercism exercises
 git config core.bare false # fix needing to use '--bare'
@@ -28,7 +28,7 @@ Not Ruby? Change the example to suit your desired language. Check the bottom of 
 **Note:** You can use cloister with any Exercism track! Say that you want to learn Rust, but there's no cloister for Rust. Make a rust directory and copy any cloister file into it. Here's an example:
 
 ```
-git clone <url>
+git clone https://github.com/SSPJ/cloister.git
 cd cloister
 mkdir rust
 cp python/cloister rust

@@ -1,0 +1,101 @@
+#!/usr/bin/env ruby
+require 'json'
+
+class Cloister
+
+  # Reads config.json into memory and parses it.
+  def initialize()
+    # init vars
+    @total_complete = 0
+    @current = nil
+    @unlocked_by = {}
+    @next_ex = []
+
+    # read and parse
+    cfg = File.read("config.json")
+    @parsed = JSON.parse(cfg)
+    @ex = @parsed["exercises"]
+    
+    # generate hash of exercises keyed by the slug
+    # of the exercise which unlocks them
+    @unlocked_by.default_proc = proc do |hash, key|
+      hash[key] = []
+    end
+    @ex.each { |x| @unlocked_by[x["unlocked_by"]] << x }
+    @is_unlocked = Hash[
+      @unlocked_by.keys.map do |k|
+        [k, @unlocked_by[k].all? { |y| y["completed"] }]
+      end
+    ]
+
+    # gather information about the state of the language track
+    @ex.each_with_index do |x, idx|
+      if x["current"]
+        @current_idx = idx
+        @current = x["slug"]
+        next
+      end
+      if not x["completed"]
+        if x["unlocked_by"].nil? or @is_unlocked[x["unlocked_by"]]
+          @next_ex << x
+        end
+      else
+        @total_complete += 1
+      end
+    end
+
+    # sort the list of upcoming excersises
+    @next_ex.sort_by! { |x| [x["difficulty"]] }
+  end
+
+  # Outputs the current and upcoming excersies.
+  def choices
+    puts "You have completed #{@total_complete} exercise(s)"
+    if @current
+      puts "You are currently working on #{@current}"
+    end
+    if @next_ex
+      puts "Next up are these:"
+      @next_ex.each do |x|
+        puts "difficulty #{x["difficulty"]}, slug #{x["slug"]}"
+      end
+      puts "Type cloister <slug> to select one"
+    else
+    end
+  end
+
+  # Marks a user-supplied exercise as work-in-progress.
+  def select(slug)
+    # locate the exercise by its slug
+    idx = @ex.index { |x| x["slug"] == slug }
+    if not idx
+      puts "Error: exercise #{slug} not found. Spelling mistake?"
+      return
+    end
+
+    # move the current flag
+    @ex[idx]["current"] = true
+    if @current
+      @ex[@current_idx]["completed"] = true
+      @ex[@current_idx].delete("current")
+    end
+
+    # write the updated json
+    File.open("config.json", "w") { |f| f.write JSON.pretty_generate(@parsed) }
+    puts "Now working on #{slug}"
+    if @current
+      puts "#{@current} marked as complete"
+    end
+  end
+end
+
+if __FILE__ == $0
+  parameter = $*[0]
+  cloister = Cloister.new
+
+  if not parameter
+    cloister.choices()
+  elsif parameter
+    cloister.select(parameter)
+  end
+end

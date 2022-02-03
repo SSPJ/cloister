@@ -1,3 +1,7 @@
+# Note bene: Exercism recently changed the schema of their challenges - this code no longer works.
+
+I hope I will have time to fix it soon-ish. :(
+
 # Introduction
 
 Exercism.io is a website that teaches programming in over 50 languages through a series of challenges. The challenges are MIT licensed and available on GitHub.
